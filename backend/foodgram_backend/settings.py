@@ -23,7 +23,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework.authtoken",
-    "corsheaders",
     "djoser",
     "recipes.apps.RecipesConfig",
     "api.apps.ApiConfig",
@@ -62,23 +61,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "foodgram_backend.wsgi.application"
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "test1",  # os.getenv("POSTGRES_DB", "django"),
-#         "USER": "postgres",  # os.getenv("POSTGRES_USER", "django"),
-#         "PASSWORD": "0000",  # os.getenv("POSTGRES_PASSWORD", ""),
-#         "HOST": "127.0.0.1",  # os.getenv("DB_HOST", ""),
-#         "PORT": "5432"  # os.getenv("DB_PORT", 5432)
-#     }
-# }
-
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3"
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv("POSTGRES_DB", "django"),
+        "USER": os.getenv("POSTGRES_USER", "django"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD", ""),
+        "HOST": os.getenv("DB_HOST", ""),
+        "PORT": os.getenv("DB_PORT", 5432)
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3"
+#     }
+# }
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -133,10 +132,5 @@ REST_FRAMEWORK = {
 DJOSER = {
     "LOGIN_FIELD": "email",
 }
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-]
-CORS_URLS_REGEX = r"^/api/.*$"
 
 CSV_FILES_DIR = os.path.join(BASE_DIR, 'data')
