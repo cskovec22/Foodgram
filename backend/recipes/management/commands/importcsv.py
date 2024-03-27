@@ -13,7 +13,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.import_ingredients()
-        self.import_tags()
+        # self.import_tags()
 
     def import_ingredients(self):
         """Импорт ингредиентов в базу данных."""
