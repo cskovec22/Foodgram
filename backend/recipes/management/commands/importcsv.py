@@ -21,9 +21,7 @@ class Command(BaseCommand):
             f'{CSV_FILES_DIR}/ingredients.csv', newline="", encoding="utf-8"
         ) as csvfile:
             reader = csv.reader(csvfile, delimiter=",")
-            for count, row in enumerate(reader):
-                if count == 0:
-                    continue
+            for row in reader:
                 Ingredient.objects.create(name=row[0], measurement_unit=row[1])
             self.stdout.write(self.style.SUCCESS("Ингредиенты загружены."))
 
@@ -33,8 +31,6 @@ class Command(BaseCommand):
             f'{CSV_FILES_DIR}/tags.csv', newline="", encoding="utf-8"
         ) as csvfile:
             reader = csv.reader(csvfile, delimiter=",")
-            for count, row in enumerate(reader):
-                if count == 0:
-                    continue
+            for row in reader:
                 Tag.objects.create(name=row[0], color=row[1], slug=row[2])
             self.stdout.write(self.style.SUCCESS("Теги загружены."))
