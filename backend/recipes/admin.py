@@ -24,7 +24,7 @@ class RecipeIngredientInline(TabularInline):
 
 @register(Recipe)
 class RecipeAdmin(ModelAdmin):
-    readonly_fields = ("author",)
+    # readonly_fields = ("author",)
     list_display = ("pk", "name", "author", "get_favorites", "pub_date")
     list_filter = ("author", "name", "tags")
     search_fields = ("name",)
