@@ -25,12 +25,12 @@ class Command(BaseCommand):
                 Ingredient.objects.create(name=row[0], measurement_unit=row[1])
             self.stdout.write(self.style.SUCCESS("Ингредиенты загружены."))
 
-    def import_tags(self):
-        """Импорт тегов в базу данных."""
-        with open(
-            f'{CSV_FILES_DIR}/tags.csv', newline="", encoding="utf-8"
-        ) as csvfile:
-            reader = csv.reader(csvfile, delimiter=",")
-            for row in reader:
-                Tag.objects.create(name=row[0], color=row[1], slug=row[2])
-            self.stdout.write(self.style.SUCCESS("Теги загружены."))
+    # def import_tags(self):
+    #     """Импорт тегов в базу данных."""
+    #     with open(
+    #         f'{CSV_FILES_DIR}/tags.csv', newline="", encoding="utf-8"
+    #     ) as csvfile:
+    #         reader = csv.reader(csvfile, delimiter=",")
+    #         for row in reader:
+    #             Tag.objects.create(name=row[0], color=row[1], slug=row[2])
+    #         self.stdout.write(self.style.SUCCESS("Теги загружены."))
