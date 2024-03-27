@@ -46,21 +46,21 @@ class CustomUserViewSet(CreateListRetrieveViewSet):
             return SetPasswordSerializer
         elif self.action in ("subscribe", "subscriptions"):
             return SubscriptionsSerializer
-        elif self.action in ("list", "retrieve", "me"):
+        elif self.action in ("list", "retrieve"):
             return CustomUserSerializer
         else:
             return CreateCustomUserSerializer
 
-    @action(
-        detail=False,
-        methods=["GET"],
-        permission_classes=[permissions.IsAuthenticated]
-    )
-    def me(self, request):
-        """Просмотреть собственный профиль."""
-        serializer = self.get_serializer(request.user)
-
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    # @action(
+    #     detail=False,
+    #     methods=["GET"],
+    #     permission_classes=[permissions.IsAuthenticated]
+    # )
+    # def me(self, request):
+    #     """Просмотреть собственный профиль."""
+    #     serializer = self.get_serializer(request.user)
+    #
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
         detail=False,
