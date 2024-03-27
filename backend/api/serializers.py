@@ -276,6 +276,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             instance,
             context={"request": self.context.get("request")}
         )
+
         return serializer.data
 
     @staticmethod

@@ -1,4 +1,4 @@
-from django.contrib.admin import ModelAdmin, register
+from django.contrib.admin import ModelAdmin, register, TabularInline
 
 from recipes.models import (
     Ingredient,
@@ -14,13 +14,22 @@ from recipes.models import (
 class IngredientAdmin(ModelAdmin):
     list_display = ("pk", "name", "measurement_unit")
     search_fields = ("name",)
+    list_editable = ("name", "measurement_unit")
+
+
+class RecipeIngredientInline(TabularInline):
+    model = RecipeIngredient
+    extra = 1
 
 
 @register(Recipe)
 class RecipeAdmin(ModelAdmin):
+    readonly_fields = ("author",)
     list_display = ("pk", "name", "author", "get_favorites", "pub_date")
     list_filter = ("author", "name", "tags")
     search_fields = ("name",)
+    filter_horizontal = ('tags',)
+    inlines = (RecipeIngredientInline,)
 
     def get_favorites(self, obj):
         return obj.favorite_recipe.count()
@@ -31,6 +40,7 @@ class RecipeAdmin(ModelAdmin):
 @register(Tag)
 class TagAdmin(ModelAdmin):
     list_display = ("pk", "name", "color", "slug")
+    list_editable = ("name", "color", "slug")
 
 
 @register(RecipeIngredient)
