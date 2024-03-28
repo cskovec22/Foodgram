@@ -162,7 +162,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет, позволяющий получать один или несколько тегов."""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    permission_classes = [permissions.AllowAny]
+    # permission_classes = [permissions.AllowAny]
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
