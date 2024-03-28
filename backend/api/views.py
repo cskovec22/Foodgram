@@ -186,10 +186,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         """Получить сериализатор."""
-        if self.request.method in ("POST", "PATCH"):
+        # if self.request.method in ("POST", "PATCH"):
+        #     return CreateRecipeSerializer
+        #
+        # return RecipeSerializer
+        if self.action in ('list', 'retrieve'):
+            return RecipeSerializer
+        elif self.action in ('create', 'partial_update'):
             return CreateRecipeSerializer
-
-        return RecipeSerializer
 
     @action(
         detail=True,
