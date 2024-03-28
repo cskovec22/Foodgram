@@ -210,10 +210,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=["POST"],
         permission_classes=[permissions.IsAuthenticated]
     )
-    def favorite(self, request, id=None):
+    def favorite(self, request, pk):
         """Добавить рецепт в избранное."""
         user = request.user
-        recipe = get_object_or_404(Recipe, pk=id)
+        recipe = get_object_or_404(Recipe, pk=pk)
 
         if Favorite.objects.filter(user=user, recipe=recipe).exists():
             return Response(
@@ -235,10 +235,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
     @favorite.mapping.delete
-    def delete_favorite(self, request, id=None):
+    def delete_favorite(self, request, pk):
         """Удалить рецепт из избранного."""
         user = request.user
-        recipe = get_object_or_404(Recipe, pk=id)
+        recipe = get_object_or_404(Recipe, pk=pk)
 
         if not Favorite.objects.filter(user=user, recipe=recipe).exists():
             return Response(
