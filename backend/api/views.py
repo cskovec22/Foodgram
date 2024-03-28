@@ -128,10 +128,10 @@ class CustomUserViewSet(UserViewSet):
         # )
 
     @subscribe.mapping.delete
-    def delete_subscribe(self, request, pk):
+    def delete_subscribe(self, request, id=None):
         """Отписаться от автора рецепта."""
         user = request.user
-        author = get_object_or_404(CustomUser, pk=pk)
+        author = get_object_or_404(CustomUser, pk=id)
 
         if not Subscriptions.objects.filter(author=author, user=user).exists():
             return Response(
@@ -210,10 +210,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=["POST"],
         permission_classes=[permissions.IsAuthenticated]
     )
-    def favorite(self, request, pk):
+    def favorite(self, request, id=None):
         """Добавить рецепт в избранное."""
         user = request.user
-        recipe = get_object_or_404(Recipe, pk=pk)
+        recipe = get_object_or_404(Recipe, pk=id)
 
         if Favorite.objects.filter(user=user, recipe=recipe).exists():
             return Response(
@@ -235,10 +235,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
     @favorite.mapping.delete
-    def delete_favorite(self, request, pk):
+    def delete_favorite(self, request, id=None):
         """Удалить рецепт из избранного."""
         user = request.user
-        recipe = get_object_or_404(Recipe, pk=pk)
+        recipe = get_object_or_404(Recipe, pk=id)
 
         if not Favorite.objects.filter(user=user, recipe=recipe).exists():
             return Response(
