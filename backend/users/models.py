@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator, EmailValidator
+from django.core.validators import EmailValidator, RegexValidator
 from django.db import models
 
 

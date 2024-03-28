@@ -3,8 +3,8 @@ from io import BytesIO
 from django.db.models import Sum
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
-from djoser.views import UserViewSet
 from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -50,11 +50,6 @@ class CustomUserViewSet(UserViewSet):
             return CustomUserSerializer
         else:
             return CreateCustomUserSerializer
-
-    # def get_permissions(self):
-    #     if self.action in ("me", "set_password"):
-    #         return [permissions.IsAuthenticated()]
-    #     return super().get_permissions()
 
     @action(
         detail=False,

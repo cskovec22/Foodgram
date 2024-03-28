@@ -1,13 +1,7 @@
-from django.contrib.admin import ModelAdmin, register, TabularInline
+from django.contrib.admin import ModelAdmin, TabularInline, register
 
-from recipes.models import (
-    Ingredient,
-    RecipeIngredient,
-    Recipe,
-    Tag,
-    ShoppingCart,
-    Favorite,
-)
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 
 
 @register(Ingredient)
@@ -24,7 +18,6 @@ class RecipeIngredientInline(TabularInline):
 
 @register(Recipe)
 class RecipeAdmin(ModelAdmin):
-    # readonly_fields = ("author",)
     list_display = ("pk", "name", "author", "get_favorites", "pub_date")
     list_filter = ("author", "name", "tags")
     search_fields = ("name",)
