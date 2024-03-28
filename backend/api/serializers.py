@@ -253,7 +253,9 @@ class RecipeSerializer(serializers.ModelSerializer):
 class CreateRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для создания и изменения рецепта."""
     ingredients = CreateIngredientInRecipeSerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(
+    # tags = serializers.PrimaryKeyRelatedField(
+    tags = serializers.SlugRelatedField(
+        slug_field="id",
         queryset=Tag.objects.all(),
         many=True
     )
