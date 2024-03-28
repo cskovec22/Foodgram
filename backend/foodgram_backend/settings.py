@@ -116,7 +116,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
+        "rest_framework.permissions.AllowAny",
     ],
 
     "DEFAULT_AUTHENTICATION_CLASSES": [
@@ -130,6 +130,14 @@ REST_FRAMEWORK = {
 
 DJOSER = {
     "LOGIN_FIELD": "email",
+    "PERMISSIONS": {
+        "user": ["djoser.permissions.CurrentUserOrAdminOrReadOnly"],
+        "user_list": ["rest_framework.permissions.IsAuthenticatedOrReadOnly"],
+    },
+    "SERIALIZERS": {
+        "user": "api.serializers.UserSerializer",
+        "current_user": "api.serializers.UserSerializer",
+    }
 }
 
 CSV_FILES_DIR = os.path.join(BASE_DIR, 'data')

@@ -3,6 +3,7 @@ from io import BytesIO
 from django.db.models import Sum
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
+from djoser.views import UserViewSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
@@ -33,50 +34,55 @@ class CreateListRetrieveViewSet(
     pass
 
 
-class CustomUserViewSet(CreateListRetrieveViewSet):
+class CustomUserViewSet(UserViewSet):
     """Вьюсет для пользователя и его подписок."""
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = LimitOffsetPagination
 
     def get_serializer_class(self):
         """Получить сериализатор."""
-        if self.action == "set_password":
-            return SetPasswordSerializer
-        elif self.action in ("subscribe", "subscriptions"):
+        # if self.action == "set_password":
+        #     return SetPasswordSerializer
+        if self.action in ("subscribe", "subscriptions"):
             return SubscriptionsSerializer
-        elif self.action in ("list", "retrieve", "me"):
+        elif self.action in ("list", "retrieve"):
             return CustomUserSerializer
         else:
             return CreateCustomUserSerializer
 
-    @action(
-        detail=False,
-        methods=["GET"],
-        permission_classes=[permissions.IsAuthenticated]
-    )
-    def me(self, request):
-        """Просмотреть собственный профиль."""
-        serializer = self.get_serializer(request.user)
+    def get_permissions(self):
+        if self.action == "me":
+            return [permissions.IsAuthenticated()]
+        return super().get_permissions()
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    # @action(
+    #     detail=False,
+    #     methods=["GET"],
+    #     permission_classes=[permissions.IsAuthenticated]
+    # )
+    # def me(self, request):
+    #     """Просмотреть собственный профиль."""
+    #     serializer = self.get_serializer(request.user)
+    #
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(
-        detail=False,
-        methods=["POST"],
-        permission_classes=[permissions.IsAuthenticated]
-    )
-    def set_password(self, request):
-        """Сменить пароль."""
-        serializer = self.get_serializer(request.user, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-
-            return Response(
-                "Пароль успешно изменен.",
-                status=status.HTTP_204_NO_CONTENT
-            )
+    # @action(
+    #     detail=False,
+    #     methods=["POST"],
+    #     permission_classes=[permissions.IsAuthenticated]
+    # )
+    # def set_password(self, request):
+    #     """Сменить пароль."""
+    #     serializer = self.get_serializer(request.user, data=request.data)
+    #     if serializer.is_valid(raise_exception=True):
+    #         serializer.save()
+    #
+    #         return Response(
+    #             "Пароль успешно изменен.",
+    #             status=status.HTTP_204_NO_CONTENT
+    #         )
 
     @action(
         detail=True,
@@ -169,7 +175,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет, позволяющий получать один или несколько ингредиентов."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    permission_classes = [permissions.AllowAny]
+    # permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend]
     filterset_class = IngredientFilter
     search_fields = ("^name",)
@@ -305,7 +311,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).values(
             "ingredient__name",
             "ingredient__measurement_unit"
-        ).annotate(amount=Sum("amount"))
+        ).annotate(amount=Sum("amount")).order_by("ingredient__name")
 
         shopping_list = get_shopping_list(ingredients)
         buffer = BytesIO(shopping_list.encode("utf8"))

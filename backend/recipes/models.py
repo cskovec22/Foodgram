@@ -1,4 +1,4 @@
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, RegexValidator
 from django.db import models
 
 from users.models import CustomUser
@@ -10,18 +10,26 @@ MIN_AMOUNT_INGREDIENT = 1
 
 class Tag(models.Model):
     """Модель тега."""
-    name = models.CharField("Название", max_length=200)
+    name = models.CharField("Название", unique=True, max_length=200)
     color = models.CharField(
-        "Цвет в HEX",
+        "Цвет",
         max_length=7,
-        blank=True,
-        null=True
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex='^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
+                message='Значение не является цветом в формате HEX!'
+            )
+        ],
+        # blank=True,
+        # null=True
     )
     slug = models.SlugField(
         "Уникальный слаг",
+        unique=True,
         max_length=200,
-        blank=True,
-        null=True
+        # blank=True,
+        # null=True
     )
 
     class Meta:
@@ -48,9 +56,15 @@ class Ingredient(models.Model):
         ordering = ("name",)
         verbose_name = "ингредиент"
         verbose_name_plural = "Ингредиенты"
+        constraints = [
+            models.UniqueConstraint(
+                fields=("name", "measurement_unit"),
+                name="unique_ingredient_unit"
+            )
+        ]
 
     def __str__(self):
-        return self.name
+        return f"{self.name}, {self.measurement_unit}"
 
 
 class Recipe(models.Model):
@@ -88,7 +102,7 @@ class Recipe(models.Model):
     pub_date = models.DateTimeField("Дата создания", auto_now_add=True)
 
     class Meta:
-        ordering = ("name",)
+        ordering = ("-pub_date",)
         verbose_name = "рецепт"
         verbose_name_plural = "Рецепты"
 

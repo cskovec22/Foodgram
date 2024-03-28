@@ -1,5 +1,5 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, EmailValidator
 from django.db import models
 
 
@@ -8,7 +8,8 @@ class CustomUser(AbstractUser):
     email = models.EmailField(
         "Адрес электронной почты",
         max_length=254,
-        unique=True
+        unique=True,
+        validators=[EmailValidator],
     )
     username = models.CharField(
         "Уникальный юзернейм",
