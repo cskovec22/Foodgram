@@ -44,7 +44,7 @@ class CustomUserViewSet(UserViewSet):
         """Получить сериализатор."""
         if self.action == "set_password":
             return SetPasswordSerializer
-        if self.action in ("subscriptions"):
+        if self.action == "subscriptions":
             return SubscriptionsSerializer
         elif self.action in ("list", "retrieve", "me"):
             return CustomUserSerializer
@@ -59,7 +59,8 @@ class CustomUserViewSet(UserViewSet):
     @action(
         detail=False,
         methods=["GET"],
-        permission_classes=[permissions.IsAuthenticated]
+        permission_classes=[permissions.IsAuthenticated],
+        pagination_class=None
     )
     def me(self, request):
         """Просмотреть собственный профиль."""
@@ -70,7 +71,8 @@ class CustomUserViewSet(UserViewSet):
     @action(
         detail=False,
         methods=["POST"],
-        permission_classes=[permissions.IsAuthenticated]
+        permission_classes=[permissions.IsAuthenticated],
+        pagination_class=None
     )
     def set_password(self, request):
         """Сменить пароль."""
@@ -86,7 +88,8 @@ class CustomUserViewSet(UserViewSet):
     @action(
         detail=True,
         methods=["POST"],
-        permission_classes=[permissions.IsAuthenticated]
+        permission_classes=[permissions.IsAuthenticated],
+        pagination_class=None
     )
     def subscribe(self, request, pk):
         """Подписаться на автора рецепта."""
@@ -103,6 +106,7 @@ class CustomUserViewSet(UserViewSet):
                 "Нельзя подписаться на себя.",
                 status=status.HTTP_400_BAD_REQUEST
             )
+
         subscribe = Subscriptions.objects.create(
             author=author,
             user=user
