@@ -44,7 +44,7 @@ class CustomUserViewSet(UserViewSet):
         """Получить сериализатор."""
         if self.action == "set_password":
             return SetPasswordSerializer
-        if self.action in ("subscribe", "subscriptions"):
+        if self.action in ("subscriptions"):
             return SubscriptionsSerializer
         elif self.action in ("list", "retrieve", "me"):
             return CustomUserSerializer
@@ -108,15 +108,20 @@ class CustomUserViewSet(UserViewSet):
             user=user
         )
         subscribe.save()
-        serializer = self.get_serializer(
-            author,
-            context={"request": request}
-        )
 
         return Response(
-            serializer.data,
+            f'Вы подписались на автора {author.username}.',
             status=status.HTTP_201_CREATED
         )
+        # serializer = self.get_serializer(
+        #     author,
+        #     context={"request": request}
+        # )
+        #
+        # return Response(
+        #     serializer.data,
+        #     status=status.HTTP_201_CREATED
+        # )
 
     @subscribe.mapping.delete
     def delete_subscribe(self, request, pk):
