@@ -168,7 +168,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет, позволяющий получать один или несколько тегов."""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    # pagination_class = None
+    pagination_class = None
     # permission_classes = [permissions.AllowAny]
 
 
@@ -185,7 +185,10 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет, позволяющий получать, создавать, изменять и удалять рецепты."""
-    queryset = Recipe.objects.all()
+    # queryset = Recipe.objects.all()
+    queryset = Recipe.objects.select_related("author").prefetch_related(
+        "tags", "ingredients"
+    )
     http_method_names = ["get", "post", "patch", "delete"]
     permission_classes = [IsAuthorOrReadOnly]
     pagination_class = PageNumberPagination
