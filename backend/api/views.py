@@ -168,6 +168,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет, позволяющий получать один или несколько тегов."""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
     # permission_classes = [permissions.AllowAny]
 
 
@@ -179,6 +180,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_class = IngredientFilter
     search_fields = ("^name",)
+    pagination_class = None
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
