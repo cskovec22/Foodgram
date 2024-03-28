@@ -261,7 +261,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(),
         many=True
     )
-    image = Base64ImageField()
+    image = Base64ImageField(use_url=True)
     cooking_time = serializers.IntegerField(
         min_value=MIN_COOKING_TIME,
         error_messages={
