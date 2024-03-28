@@ -8,6 +8,9 @@ from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
 from users.models import CustomUser, Subscriptions
 
 
+MIN_COOKING_TIME = 1
+
+
 class Base64ImageField(serializers.ImageField):
     """Поле для декодирования изображения."""
     def to_internal_value(self, data):
@@ -203,8 +206,9 @@ class CreateIngredientInRecipeSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для рецепта."""
-    tags = TagSerializer(many=True)
-    author = CustomUserSerializer()
+    image = Base64ImageField()
+    tags = TagSerializer(many=True, read_only=True)
+    author = CustomUserSerializer(read_only=True)
     ingredients = IngredientInRecipeSerializer(
         source="ingredients_list",
         many=True
@@ -252,12 +256,20 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для создания и изменения рецепта."""
+    author = CustomUserSerializer(read_only=True)
     ingredients = CreateIngredientInRecipeSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True
     )
     image = Base64ImageField()
+    cooking_time = serializers.IntegerField(
+        min_value=MIN_COOKING_TIME,
+        error_messages={
+            "min_value": "Время приготовления не может быть "
+                         f"меньше {MIN_COOKING_TIME}."
+        }
+    )
 
     class Meta:
         model = Recipe
@@ -305,12 +317,22 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         """Добавить в рецепт ингредиенты и теги."""
         recipe.tags.set(tags)
 
-        for ingredient in ingredients:
-            RecipeIngredient.objects.create(
+        # for ingredient in ingredients:
+        #     RecipeIngredient.objects.create(
+        #         recipe=recipe,
+        #         ingredient=Ingredient.objects.get(pk=ingredient["id"]),
+        #         amount=ingredient["amount"]
+        #     )
+
+        create_ingredients = [
+            RecipeIngredient(
                 recipe=recipe,
-                ingredient=Ingredient.objects.get(pk=ingredient["id"]),
+                ingredient=ingredient["id"],
                 amount=ingredient["amount"]
             )
+            for ingredient in ingredients
+        ]
+        RecipeIngredient.objects.bulk_create(create_ingredients)
 
     def create(self, validated_data):
         """Создать рецепт."""
