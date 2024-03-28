@@ -91,10 +91,10 @@ class CustomUserViewSet(UserViewSet):
         permission_classes=[permissions.IsAuthenticated],
         pagination_class=None
     )
-    def subscribe(self, request, pk):
+    def subscribe(self, request, id=None):
         """Подписаться на автора рецепта."""
         user = request.user
-        author = get_object_or_404(CustomUser, pk=pk)
+        author = get_object_or_404(CustomUser, pk=id)
 
         if Subscriptions.objects.filter(author=author, user=user).exists():
             return Response(
