@@ -12,6 +12,7 @@ from rest_framework.pagination import (LimitOffsetPagination,
 from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
+from api.paginations import CustomPagination
 from api.permissions import IsAuthorOrReadOnly
 from api.serializers import (CreateCustomUserSerializer,
                              CreateRecipeSerializer, CustomUserSerializer,
@@ -39,7 +40,7 @@ class CustomUserViewSet(UserViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    pagination_class = LimitOffsetPagination
+    pagination_class = CustomPagination
 
     def get_serializer_class(self):
         """Получить сериализатор."""
@@ -191,7 +192,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     http_method_names = ["get", "post", "patch", "delete"]
     permission_classes = [IsAuthorOrReadOnly]
-    pagination_class = PageNumberPagination
+    pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
 
