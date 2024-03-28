@@ -7,8 +7,6 @@ from djoser.views import UserViewSet
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import mixins, permissions, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.pagination import (LimitOffsetPagination,
-                                       PageNumberPagination)
 from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
@@ -44,46 +42,46 @@ class CustomUserViewSet(UserViewSet):
 
     def get_serializer_class(self):
         """Получить сериализатор."""
-        # if self.action == "set_password":
-        #     return SetPasswordSerializer
+        if self.action == "set_password":
+            return SetPasswordSerializer
         if self.action in ("subscribe", "subscriptions"):
             return SubscriptionsSerializer
-        elif self.action in ("list", "retrieve"):
+        elif self.action in ("list", "retrieve", "me"):
             return CustomUserSerializer
         else:
             return CreateCustomUserSerializer
 
-    def get_permissions(self):
-        if self.action == "me":
-            return [permissions.IsAuthenticated()]
-        return super().get_permissions()
+    # def get_permissions(self):
+    #     if self.action in ("me", "set_password"):
+    #         return [permissions.IsAuthenticated()]
+    #     return super().get_permissions()
 
-    # @action(
-    #     detail=False,
-    #     methods=["GET"],
-    #     permission_classes=[permissions.IsAuthenticated]
-    # )
-    # def me(self, request):
-    #     """Просмотреть собственный профиль."""
-    #     serializer = self.get_serializer(request.user)
-    #
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
+    @action(
+        detail=False,
+        methods=["GET"],
+        permission_classes=[permissions.IsAuthenticated]
+    )
+    def me(self, request):
+        """Просмотреть собственный профиль."""
+        serializer = self.get_serializer(request.user)
 
-    # @action(
-    #     detail=False,
-    #     methods=["POST"],
-    #     permission_classes=[permissions.IsAuthenticated]
-    # )
-    # def set_password(self, request):
-    #     """Сменить пароль."""
-    #     serializer = self.get_serializer(request.user, data=request.data)
-    #     if serializer.is_valid(raise_exception=True):
-    #         serializer.save()
-    #
-    #         return Response(
-    #             "Пароль успешно изменен.",
-    #             status=status.HTTP_204_NO_CONTENT
-    #         )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=False,
+        methods=["POST"],
+        permission_classes=[permissions.IsAuthenticated]
+    )
+    def set_password(self, request):
+        """Сменить пароль."""
+        serializer = self.get_serializer(request.user, data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+
+            return Response(
+                "Пароль успешно изменен.",
+                status=status.HTTP_204_NO_CONTENT
+            )
 
     @action(
         detail=True,
@@ -170,14 +168,12 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
-    # permission_classes = [permissions.AllowAny]
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет, позволяющий получать один или несколько ингредиентов."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    # permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend]
     filterset_class = IngredientFilter
     search_fields = ("^name",)
@@ -186,10 +182,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет, позволяющий получать, создавать, изменять и удалять рецепты."""
-    # queryset = Recipe.objects.all()
-    queryset = Recipe.objects.select_related("author").prefetch_related(
-        "tags", "ingredients"
-    )
+    queryset = Recipe.objects.all()
     http_method_names = ["get", "post", "patch", "delete"]
     permission_classes = [IsAuthorOrReadOnly]
     pagination_class = CustomPagination
@@ -198,10 +191,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         """Получить сериализатор."""
-        # if self.request.method in ("POST", "PATCH"):
-        #     return CreateRecipeSerializer
-        #
-        # return RecipeSerializer
         if self.action in ('list', 'retrieve'):
             return RecipeSerializer
         elif self.action in ('create', 'partial_update'):

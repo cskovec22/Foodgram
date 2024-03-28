@@ -316,13 +316,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         """Добавить в рецепт ингредиенты и теги."""
         recipe.tags.set(tags)
 
-        # for ingredient in ingredients:
-        #     RecipeIngredient.objects.create(
-        #         recipe=recipe,
-        #         ingredient=Ingredient.objects.get(pk=ingredient["id"]),
-        #         amount=ingredient["amount"]
-        #     )
-
         create_ingredients = [
             RecipeIngredient(
                 recipe=recipe,
