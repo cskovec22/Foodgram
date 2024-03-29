@@ -6,6 +6,15 @@ on:
       - main
 
 jobs:
+
+  checkout-and-print-tree:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: Print project tree
+        run: tree .
+
   tests:
     runs-on: ubuntu-latest
     services:
@@ -182,4 +191,3 @@ jobs:
         to: ${{ secrets.TELEGRAM_TO }}
         token: ${{ secrets.TELEGRAM_TOKEN }}
         message: Деплой foodgram успешно выполнен!
-        
