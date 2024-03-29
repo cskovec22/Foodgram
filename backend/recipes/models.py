@@ -21,15 +21,11 @@ class Tag(models.Model):
                 message='Значение не является цветом в формате HEX!'
             )
         ],
-        # blank=True,
-        # null=True
     )
     slug = models.SlugField(
         "Уникальный слаг",
         unique=True,
         max_length=200,
-        # blank=True,
-        # null=True
     )
 
     class Meta:
