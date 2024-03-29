@@ -101,11 +101,11 @@ jobs:
     steps:
       - name: executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
-#        with:
-#          host: ${{ secrets.HOST }}
-#          username: ${{ secrets.USER }}
-#          key: ${{ secrets.SSH_KEY }}
-#          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
 #          script: |
 ##            sudo docker compose -f foodgram/infra/docker-compose.production.yml down
 #            cd foodgram/infra
