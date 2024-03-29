@@ -145,7 +145,7 @@ jobs:
       steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-      # Копируем docker-compose.production.yml на продакшен-сервер
+      # Копируем docker-compose.production.yml и nginx.conf на продакшен-сервер
       - name: Copy docker-compose.yml via ssh
         uses: appleboy/scp-action@master
         with:
@@ -153,18 +153,18 @@ jobs:
           username: ${{ secrets.USER }}
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: "infra/docker-compose.production.yml"
+          source: "infra"
           target: "foodgram"
 
-      - name: Copy nginx.conf
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
-          key: ${{ secrets.SSH_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
-          source: "infra/nginx.conf"
-          target: "foodgram/infra"
+#      - name: Copy nginx.conf
+#        uses: appleboy/scp-action@master
+#        with:
+#          host: ${{ secrets.HOST }}
+#          username: ${{ secrets.USER }}
+#          key: ${{ secrets.SSH_KEY }}
+#          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+#          source: "infra/nginx.conf"
+#          target: "foodgram"
 
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
