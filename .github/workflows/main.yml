@@ -166,10 +166,9 @@ jobs:
             cd foodgram/infra
             sudo docker compose -f docker-compose.production.yml down
             sudo docker image rm ${{ secrets.DOCKER_USERNAME }}/foodgram_backend ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend
-            
-#            sudo rm -f .env
-#            sudo touch .env
-#            sudo chmod 666 .env
+            sudo rm -f .env
+            sudo touch .env
+            sudo chmod 666 .env
 
 #            sudo echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
 #            sudo echo POSTGRES_ENGINE=${{ secrets.POSTGRES_ENGINE }} >> .env
