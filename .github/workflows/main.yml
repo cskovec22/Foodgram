@@ -2,18 +2,18 @@ name: Main Foodgram workflow
 
 on:
   push:
-    branches:
-      - main
+    branches: [ master ]
+#      - main
 
 jobs:
 
-  checkout-and-print-tree:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v3
-      - name: Print project tree
-        run: tree .
+#  checkout-and-print-tree:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Check out repository code
+#        uses: actions/checkout@v3
+#      - name: Print project tree
+#        run: tree .
 
   tests:
     runs-on: ubuntu-latest
