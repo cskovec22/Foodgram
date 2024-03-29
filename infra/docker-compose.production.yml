@@ -8,6 +8,7 @@ volumes:
 services:
 
   db:
+    container_name: foodgram_db
     image: postgres:13.0-alpine
     volumes:
       - pg_data:/var/lib/postgresql/data/
@@ -15,6 +16,7 @@ services:
       - ./.env
 
   backend:
+    container_name: foodgram_backend
     image: cskovec22/foodgram_backend
     volumes:
       - static:/app/static/
@@ -25,6 +27,7 @@ services:
       - ./.env
 
   frontend:
+    container_name: foodgram_frontend
     image: cskovec22/foodgram_frontend
     volumes:
       - ../frontend/:/app/result_build/
@@ -34,6 +37,7 @@ services:
       - ./.env
 
   nginx:
+    container_name: foodgram_nginx
     image: nginx:1.19.3
     ports:
       - "8080:80"
