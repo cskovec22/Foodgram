@@ -164,8 +164,14 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             cd foodgram/infra
-            sudo docker compose -f docker-compose.production.yml pull
+#            sudo docker compose -f docker-compose.production.yml pull
+#            sudo docker compose -f docker-compose.production.yml stop
+#            sudo docker compose -f docker-compose.production.yml rm backend frontend
             sudo docker compose -f docker-compose.production.yml down
+            sudo docker image rm ${{ secrets.DOCKER_USERNAME }}/foodgram_backend ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend
+
+#            sudo docker compose -f docker-compose.production.yml pull
+#            sudo docker compose -f docker-compose.production.yml down
             
             sudo rm -f .env
             sudo touch .env
@@ -182,8 +188,8 @@ jobs:
             sudo echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
             
             sudo docker compose -f docker-compose.production.yml up -d --build
-            sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
-            sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
+#            sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
+#            sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
 #            sudo docker compose -f docker-compose.production.yml exec backend python manage.py importcsv
 
   send_message:
