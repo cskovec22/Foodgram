@@ -120,42 +120,6 @@ class PostFavoriteShoppingSerializer(serializers.ModelSerializer):
         return self.context.get("request").build_absolute_uri(obj.image.url)
 
 
-class SubscriptionsSerializer(CustomUserSerializer):
-    """Сериализатор для просмотра подписок."""
-    recipes = serializers.SerializerMethodField(read_only=True)
-    recipes_count = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = CustomUser
-        fields = [
-            "email",
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "is_subscribed",
-            "recipes",
-            "recipes_count"
-        ]
-
-    def get_recipes(self, obj):
-        """Получить рецепты авторов из подписки."""
-        request = self.context.get("request")
-        recipes = obj.recipes.all()
-        recipes_limit = request.query_params.get("recipes_limit")
-        if recipes_limit:
-            recipes = recipes[:int(recipes_limit)]
-
-        return PostFavoriteShoppingSerializer(
-            recipes, context={"request": request}, many=True
-        ).data
-
-    def get_recipes_count(self, obj):
-        """Получить количество рецептов автора."""
-
-        return obj.recipes.count()
-
-
 class TagSerializer(serializers.ModelSerializer):
     """Сериализатор для тега."""
 
@@ -290,26 +254,45 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
         return serializer.data
 
-    @staticmethod
-    def validate_ingredients(ingredients):
-        """Валидация данных ингредиентов."""
+    def validate(self, data):
+        ingredients = data.get("ingredients")
         if not ingredients:
             raise serializers.ValidationError(
                 "Должен быть хотя бы один ингредиент."
             )
+
         unique_ingredients = []
+
         for ingredient in ingredients:
-            if ingredient["amount"] < 1:
+            if not Ingredient.objects.filter(pk=ingredient.get("id")).exists():
+                raise serializers.ValidationError(
+                    "Такого ингредиента нет."
+                )
+
+            if ingredient.get("amount") < 1:
                 raise serializers.ValidationError(
                     "Убедитесь, что это значение больше либо равно 1."
                 )
-            if ingredient["id"] in unique_ingredients:
+
+            if ingredient.get("id") in unique_ingredients:
                 raise serializers.ValidationError(
                     "Ингредиенты не должны быть одинаковыми."
                 )
             unique_ingredients.append(ingredient.get("id"))
 
-        return ingredients
+        tags = data.get("tags")
+
+        if not tags:
+            raise serializers.ValidationError(
+                "Должен быть хотя бы один тег."
+            )
+
+        if len(set(tags)) != len(tags):
+            raise serializers.ValidationError(
+                "Теги не должны быть одинаковыми."
+            )
+
+        return data
 
     @staticmethod
     def add_ingredients_and_tags(recipe, ingredients, tags):
@@ -369,3 +352,70 @@ class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = ["id", "favorite_recipe"]
+
+
+class SubscriptionsSerializer(CustomUserSerializer):
+    """Сериализатор для просмотра подписок."""
+    recipes = serializers.SerializerMethodField(read_only=True)
+    recipes_count = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            "email",
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "is_subscribed",
+            "recipes",
+            "recipes_count"
+        ]
+
+    def get_recipes(self, obj):
+        """Получить рецепты авторов из подписки."""
+        request = self.context.get("request")
+        recipes = obj.recipes.all()
+        recipes_limit = request.query_params.get("recipes_limit")
+        if recipes_limit:
+            recipes = recipes[:int(recipes_limit)]
+
+        return PostFavoriteShoppingSerializer(
+            recipes, context={"request": request}, many=True
+        ).data
+
+    def get_recipes_count(self, obj):
+        """Получить количество рецептов автора."""
+
+        return obj.recipes.count()
+
+
+class CreateSubscribeSerializer(SubscriptionsSerializer):
+    """Сериализатор для подписки и отписки от автора."""
+    email = serializers.ReadOnlyField()
+    username = serializers.ReadOnlyField()
+    first_name = serializers.ReadOnlyField()
+    last_name = serializers.ReadOnlyField()
+    recipes = RecipeSerializer(many=True, read_only=True)
+    recipes_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'is_subscribed',
+            'recipes',
+            'recipes_count'
+        )
+
+    def validate(self, obj):
+        if self.context['request'].user == obj:
+            raise serializers.ValidationError(
+                f"Вы уже подписаны на автора {obj.username}."
+            )
+
+        return obj
