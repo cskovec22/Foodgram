@@ -164,7 +164,6 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
-#            cd foodgram/infra
             cd foodgram
             sudo docker compose -f docker-compose.production.yml down
             sudo docker image rm ${{ secrets.DOCKER_USERNAME }}/foodgram_backend ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend
