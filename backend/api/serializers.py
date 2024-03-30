@@ -3,9 +3,8 @@ import base64
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
-from users.models import CustomUser, Subscriptions
+from recipes.models import Favorite, Ingredient, Recipe, RecipeIngredient, Tag
+from users.models import CustomUser
 
 
 MIN_COOKING_TIME = 1
@@ -399,7 +398,7 @@ class CreateSubscribeSerializer(SubscriptionsSerializer):
         """Валидация подписки."""
         if self.context['request'].user == obj:
             raise serializers.ValidationError(
-                f"Нельзя подписаться на себя."
+                "Нельзя подписаться на себя."
             )
 
         return obj
