@@ -54,7 +54,7 @@ class Subscriptions(models.Model):
     )
 
     class Meta:
-        ordering = ("id",)
+        ordering = ("-author_id",)
         verbose_name = "подписка"
         verbose_name_plural = "Подписки"
 

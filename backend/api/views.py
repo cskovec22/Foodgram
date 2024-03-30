@@ -72,13 +72,13 @@ class CustomUserViewSet(UserViewSet):
     def set_password(self, request):
         """Сменить пароль."""
         serializer = self.get_serializer(request.user, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-            return Response(
-                "Пароль успешно изменен.",
-                status=status.HTTP_204_NO_CONTENT
-            )
+        return Response(
+            "Пароль успешно изменен.",
+            status=status.HTTP_204_NO_CONTENT
+        )
 
     @action(
         detail=True,
@@ -90,14 +90,9 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         author = get_object_or_404(CustomUser, pk=id)
 
-        if Subscriptions.objects.filter(author=author, user=user).exists():
+        if author.recipe_author.filter(user=user).exists():
             return Response(
                 f"Вы уже подписаны на автора {author.username}.",
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if author == user:
-            return Response(
-                "Нельзя подписаться на себя.",
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -117,7 +112,7 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         author = get_object_or_404(CustomUser, pk=id)
 
-        if not Subscriptions.objects.filter(author=author, user=user).exists():
+        if not author.recipe_author.filter(user=user).exists():
             return Response(
                 f"Вы не подписаны на автора {author.username}.",
                 status=status.HTTP_400_BAD_REQUEST
@@ -207,7 +202,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         recipe = Recipe.objects.get(pk=pk)
 
-        if Favorite.objects.filter(user=user, recipe=recipe).exists():
+        if user.favorite_user.filter(recipe=recipe).exists():
             return Response(
                 "Рецепт уже находится в избранном.",
                 status=status.HTTP_400_BAD_REQUEST
@@ -232,7 +227,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
 
-        if not Favorite.objects.filter(user=user, recipe=recipe).exists():
+        if not user.favorite_user.filter(recipe=recipe).exists():
             return Response(
                 "Рецепт не находится в избранном.",
                 status=status.HTTP_400_BAD_REQUEST
@@ -260,7 +255,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         recipe = Recipe.objects.get(pk=pk)
 
-        if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
+        if user.shopping_user.filter(recipe=recipe).exists():
             return Response(
                 "Рецепт уже находится в корзине.",
                 status=status.HTTP_400_BAD_REQUEST
@@ -282,18 +277,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @shopping_cart.mapping.delete
     def delete_shopping_cart(self, request, pk):
         """Убрать ингредиенты рецепта из корзины."""
+        user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
 
-        if not ShoppingCart.objects.filter(
-                user=request.user,
-                recipe=recipe
-        ).exists():
+        if not user.shopping_user.filter(recipe=recipe).exists():
             return Response(
                 "Рецепта в корзине нет.",
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        ShoppingCart.objects.get(user=request.user, recipe=recipe).delete()
+        ShoppingCart.objects.get(user=user, recipe=recipe).delete()
 
         return Response(
             "Ингредиенты рецепта удалены из корзины.",

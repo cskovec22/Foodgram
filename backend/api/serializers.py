@@ -9,6 +9,9 @@ from users.models import CustomUser, Subscriptions
 
 
 MIN_COOKING_TIME = 1
+MAX_COOKING_TIME = 32000
+MIN_AMOUNT_INGREDIENT = 1
+MAX_AMOUNT_INGREDIENT = 32000
 
 
 class Base64ImageField(serializers.ImageField):
@@ -30,7 +33,7 @@ class SetPasswordSerializer(serializers.Serializer):
 
     def validate_current_password(self, value):
         """Валидация текущего пароля."""
-        user = self.context.get("request").user
+        user = self.context["request"].user
         if not user.check_password(value):
             raise serializers.ValidationError(
                 "Вы ввели неправильный текущий пароль!"
@@ -69,13 +72,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         """Метод проверки подписки на автора."""
-        user = self.context.get("request").user
+        user = self.context["request"].user
 
         if user.is_authenticated:
-            return Subscriptions.objects.filter(
-                user=user,
-                author=obj.id
-            ).exists()
+            return user.subscriber.filter(author=obj.id).exists()
+
         return False
 
 
@@ -117,7 +118,7 @@ class PostFavoriteShoppingSerializer(serializers.ModelSerializer):
     def get_image(self, obj):
         """Получение абсолютного URL-адреса изображения."""
 
-        return self.context.get("request").build_absolute_uri(obj.image.url)
+        return self.context["request"].build_absolute_uri(obj.image.url)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -152,20 +153,14 @@ class IngredientInRecipeSerializer(serializers.ModelSerializer):
 class CreateIngredientInRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления ингредиентов в рецепт."""
     id = serializers.IntegerField()
-    amount = serializers.IntegerField()
+    amount = serializers.IntegerField(
+        max_value=MAX_AMOUNT_INGREDIENT,
+        min_value=MIN_AMOUNT_INGREDIENT
+    )
 
     class Meta:
         model = RecipeIngredient
         fields = ["id", "amount"]
-
-    @staticmethod
-    def validate_amount(value):
-        """Валидация количества ингредиента."""
-        if value < 1:
-            raise serializers.ValidationError(
-                "Количество ингредиетна должно быть больше 0."
-            )
-        return value
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -198,24 +193,20 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_favorited(self, obj):
         """Проверка, находится ли рецепт в избранном."""
         request = self.context.get("request")
+        user = request.user
 
-        if request is None or request.user.is_anonymous:
+        if request is None or user.is_anonymous:
             return False
-        return Favorite.objects.filter(
-            user=request.user,
-            recipe=obj
-        ).exists()
+        return user.subscriber.filter(recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         """Проверка, находится ли рецепт в избранном."""
         request = self.context.get("request")
+        user = request.user
 
-        if request is None or request.user.is_anonymous:
+        if request is None or user.is_anonymous:
             return False
-        return ShoppingCart.objects.filter(
-            user=request.user,
-            recipe=obj
-        ).exists()
+        return user.subscriber.filter(recipe=obj).exists()
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
@@ -227,11 +218,8 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     )
     image = Base64ImageField()
     cooking_time = serializers.IntegerField(
-        min_value=MIN_COOKING_TIME,
-        error_messages={
-            "min_value": "Время приготовления не может быть "
-                         f"меньше {MIN_COOKING_TIME}."
-        }
+        max_value=MAX_COOKING_TIME,
+        min_value=MIN_COOKING_TIME
     )
 
     class Meta:
@@ -261,7 +249,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 "Должен быть хотя бы один ингредиент."
             )
 
-        unique_ingredients = []
+        unique_ingredients = set()
 
         for ingredient in ingredients:
             if not Ingredient.objects.filter(pk=ingredient.get("id")).exists():
@@ -269,16 +257,11 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                     "Такого ингредиента нет."
                 )
 
-            if ingredient.get("amount") < 1:
-                raise serializers.ValidationError(
-                    "Убедитесь, что это значение больше либо равно 1."
-                )
-
             if ingredient.get("id") in unique_ingredients:
                 raise serializers.ValidationError(
                     "Ингредиенты не должны быть одинаковыми."
                 )
-            unique_ingredients.append(ingredient.get("id"))
+            unique_ingredients.add(ingredient.get("id"))
 
         tags = data.get("tags")
 
@@ -413,9 +396,10 @@ class CreateSubscribeSerializer(SubscriptionsSerializer):
         )
 
     def validate(self, obj):
+        """Валидация подписки."""
         if self.context['request'].user == obj:
             raise serializers.ValidationError(
-                f"Вы уже подписаны на автора {obj.username}."
+                f"Нельзя подписаться на себя."
             )
 
         return obj

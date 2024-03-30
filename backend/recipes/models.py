@@ -1,11 +1,16 @@
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
 
 from users.models import CustomUser
 
 
+MAX_LEN_TITLE = 200
+MAX_LEN_TITLE_COLOR = 7
 MIN_COOKING_TIME = 1
+MAX_COOKING_TIME = 32000
 MIN_AMOUNT_INGREDIENT = 1
+MAX_AMOUNT_INGREDIENT = 32000
 
 
 class Tag(models.Model):
@@ -13,7 +18,7 @@ class Tag(models.Model):
     name = models.CharField("Название", unique=True, max_length=200)
     color = models.CharField(
         "Цвет",
-        max_length=7,
+        max_length=MAX_LEN_TITLE_COLOR,
         unique=True,
         validators=[
             RegexValidator(
@@ -25,7 +30,7 @@ class Tag(models.Model):
     slug = models.SlugField(
         "Уникальный слаг",
         unique=True,
-        max_length=200,
+        max_length=MAX_LEN_TITLE,
     )
 
     class Meta:
@@ -41,11 +46,11 @@ class Ingredient(models.Model):
     """Модель ингредиента."""
     name = models.CharField(
         verbose_name="Название",
-        max_length=200
+        max_length=MAX_LEN_TITLE
     )
     measurement_unit = models.CharField(
         verbose_name="Единица измерения",
-        max_length=200
+        max_length=MAX_LEN_TITLE
     )
 
     class Meta:
@@ -90,10 +95,10 @@ class Recipe(models.Model):
     text = models.TextField("Описание")
     cooking_time = models.PositiveSmallIntegerField(
         "Время приготовления (в минутах)",
-        validators=[MinValueValidator(
-            MIN_COOKING_TIME,
-            message="Минимальное время приготовления - 1 мин."
-        )]
+        validators=[
+            MinValueValidator(MIN_COOKING_TIME),
+            MaxValueValidator(MAX_COOKING_TIME)
+        ]
     )
     pub_date = models.DateTimeField("Дата создания", auto_now_add=True)
 
@@ -122,10 +127,10 @@ class RecipeIngredient(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         "Количество",
-        validators=[MinValueValidator(
-            MIN_AMOUNT_INGREDIENT,
-            message="Убедитесь, что это значение больше либо равно 1."
-        )]
+        validators=[
+            MinValueValidator(MIN_AMOUNT_INGREDIENT),
+            MaxValueValidator(MAX_AMOUNT_INGREDIENT)
+        ]
     )
 
     class Meta:
