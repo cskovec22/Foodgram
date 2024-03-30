@@ -19,7 +19,8 @@ from api.serializers import (CreateCustomUserSerializer,
                              SetPasswordSerializer, SubscriptionsSerializer,
                              TagSerializer)
 from api.utils import get_shopping_list
-from recipes.models import Favorite, Ingredient, Recipe, RecipeIngredient, Tag
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 from users.models import CustomUser, Subscriptions
 
 
