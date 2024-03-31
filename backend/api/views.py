@@ -43,14 +43,16 @@ class CustomUserViewSet(UserViewSet):
 
     def get_serializer_class(self):
         """Получить сериализатор."""
-        if self.action == "set_password":
-            return SetPasswordSerializer
-        if self.action in ("subscribe", "subscriptions"):
-            return SubscriptionsSerializer
-        elif self.action in ("list", "retrieve", "me"):
-            return CustomUserSerializer
-        else:
-            return CreateCustomUserSerializer
+        serializer_classes = {
+            "set_password": SetPasswordSerializer,
+            "subscribe": SubscriptionsSerializer,
+            "subscriptions": SubscriptionsSerializer,
+            "list": CustomUserSerializer,
+            "retrieve": CustomUserSerializer,
+            "me": CustomUserSerializer,
+        }
+
+        return serializer_classes.get(self.action, CreateCustomUserSerializer)
 
     @action(
         detail=False,
@@ -113,13 +115,14 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         author = get_object_or_404(CustomUser, pk=id)
 
-        if not author.recipe_author.filter(user=user).exists():
+        subscription = author.recipe_author.filter(user=user).first()
+        if not subscription:
             return Response(
                 f"Вы не подписаны на автора {author.username}.",
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        Subscriptions.objects.get(author=author, user=user).delete()
+        subscription.delete()
 
         return Response(
             f"Вы отписались от автора {author.username}.",
@@ -196,12 +199,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def favorite(self, request, pk):
         """Добавить рецепт в избранное."""
         user = request.user
-        if not Recipe.objects.filter(pk=pk).exists():
+
+        recipe = Recipe.objects.filter(pk=pk).first()
+        if not recipe:
             return Response(
                 "Такого рецепта не существует.",
                 status=status.HTTP_400_BAD_REQUEST
             )
-        recipe = Recipe.objects.get(pk=pk)
 
         if user.favorite_user.filter(recipe=recipe).exists():
             return Response(
@@ -228,13 +232,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
 
-        if not user.favorite_user.filter(recipe=recipe).exists():
+        favorite = user.favorite_user.filter(recipe=recipe).first()
+        if not favorite:
             return Response(
                 "Рецепт не находится в избранном.",
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        Favorite.objects.get(user=user, recipe=recipe).delete()
+        favorite.delete()
 
         return Response(
             "Рецепт удален из избранного.",
@@ -249,12 +254,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk):
         """Добавить ингредиенты рецепта в список покупок."""
         user = request.user
-        if not Recipe.objects.filter(pk=pk).exists():
+        recipe = Recipe.objects.filter(pk=pk).first()
+
+        if not recipe:
             return Response(
                 "Такого рецепта не существует.",
                 status=status.HTTP_400_BAD_REQUEST
             )
-        recipe = Recipe.objects.get(pk=pk)
 
         if user.shopping_user.filter(recipe=recipe).exists():
             return Response(
@@ -281,13 +287,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
 
-        if not user.shopping_user.filter(recipe=recipe).exists():
+        shopping_cart = user.shopping_user.filter(recipe=recipe).first()
+        if not shopping_cart:
             return Response(
                 "Рецепта в корзине нет.",
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        ShoppingCart.objects.get(user=user, recipe=recipe).delete()
+        shopping_cart.delete()
 
         return Response(
             "Ингредиенты рецепта удалены из корзины.",

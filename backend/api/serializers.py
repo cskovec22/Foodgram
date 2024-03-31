@@ -191,7 +191,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         """Проверка, находится ли рецепт в избранном."""
-        request = self.context.get("request")
+        request = self.context["request"]
         user = request.user
 
         if request is None or user.is_anonymous:
@@ -200,7 +200,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_in_shopping_cart(self, obj):
         """Проверка, находится ли рецепт в избранном."""
-        request = self.context.get("request")
+        request = self.context["request"]
         user = request.user
 
         if request is None or user.is_anonymous:
@@ -297,7 +297,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         tags = validated_data.pop("tags")
 
         recipe = Recipe.objects.create(
-            author=self.context.get("request").user,
+            author=self.context["request"].user,
             **validated_data
         )
 
@@ -307,12 +307,12 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """Обновить рецепт."""
-        RecipeIngredient.objects.filter(recipe=instance).delete()
+        instance.ingredients_list.all().delete()
 
         ingredients = validated_data.pop("ingredients")
         tags = validated_data.pop("tags")
 
-        instance.author = self.context.get("request").user
+        instance.author = self.context["request"].user
         instance.image = validated_data.get("image", instance.image)
         instance.name = validated_data.get("name", instance.name)
         instance.text = validated_data.get("text", instance.text)
