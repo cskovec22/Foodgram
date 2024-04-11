@@ -52,8 +52,8 @@
 
 - Клонируйте репозиторий и перейдите в него в командной строке:
 ```
-git clone git@github.com:cskovec22/foodgram-project-react.git
-cd foodgram-project-react
+git clone git@github.com:cskovec22/Foodgram.git
+cd Foodgram
 ```
 
 - Установите и активируйте виртуальное окружение:
@@ -68,13 +68,13 @@ python -m venv venv
     source venv/bin/activate
     ```
 
-* Для Windows:
+- Для Windows:
 
     ```
     source venv/Scripts/activate
     ```
 
-Установите зависимости из файла requirements.txt:
+- Установите зависимости из файла requirements.txt:
 
 ```
 python -m pip install --upgrade pip
@@ -189,4 +189,3 @@ http://localhost/api/docs/
 *Васин Никита*  
 **email:** *cskovec22@yandex.ru*  
 **telegram:** *@cskovec22*  
-**VK:** https://vk.com/cskovec22
